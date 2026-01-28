@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Search, Swords, Trophy, Zap, Users, Clock, Shield, Globe, Plus, Play } from 'lucide-react';
+import { Search, Swords, Trophy, Zap, Users, Clock, Plus, Play } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
 import { Badge } from '@/components/ui/badge';
@@ -12,7 +12,7 @@ import { Label } from '@/components/ui/label';
 import { PageLayout } from '@/components/layout/PageLayout';
 import { api } from '@/lib/api';
 import { useAuth } from '@/auth/AuthProvider';
-import type { AxiosError } from 'axios';
+
 
 type Match = {
   id: string;
@@ -116,9 +116,9 @@ export default function DiscoverPage() {
         <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-purple-900/30 to-pink-900/30 p-8 mb-8 backdrop-blur-sm border border-white/10">
           <div className="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-pink-500/10 blur-3xl" />
           <div className="absolute -left-20 -bottom-20 h-64 w-64 rounded-full bg-purple-500/10 blur-3xl" />
-          
+
           <div className="relative z-10">
-            <motion.h1 
+            <motion.h1
               className="text-3xl font-bold tracking-tight text-white sm:text-4xl"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -126,7 +126,7 @@ export default function DiscoverPage() {
             >
               Find Your Next Match
             </motion.h1>
-            <motion.p 
+            <motion.p
               className="mt-3 max-w-2xl text-lg text-purple-200/90"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -134,8 +134,8 @@ export default function DiscoverPage() {
             >
               Compete in skill-based matches, join tournaments, and climb the leaderboards.
             </motion.p>
-            
-            <motion.div 
+
+            <motion.div
               className="mt-8 flex flex-col gap-4 sm:flex-row"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -143,16 +143,16 @@ export default function DiscoverPage() {
             >
               <div className="relative flex-1">
                 <Search className="pointer-events-none absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-purple-400" />
-                <Input 
-                  className="h-12 bg-white/5 border-white/10 pl-10 text-white placeholder:text-purple-200/50 focus:border-pink-400/50 focus-visible:ring-pink-500/50" 
-                  placeholder="Search matches, players, formats..." 
+                <Input
+                  className="h-12 bg-white/5 border-white/10 pl-10 text-white placeholder:text-purple-200/50 focus:border-pink-400/50 focus-visible:ring-pink-500/50"
+                  placeholder="Search matches, players, formats..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                 />
               </div>
               <Dialog open={createMatchOpen} onOpenChange={setCreateMatchOpen}>
                 <DialogTrigger asChild>
-                  <Button 
+                  <Button
                     className="h-12 bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white shadow-lg shadow-pink-500/20 transition-all hover:shadow-pink-500/40"
                     size="lg"
                   >
@@ -240,7 +240,7 @@ export default function DiscoverPage() {
                   <p className="text-sm font-medium text-purple-200/70">{stat.name}</p>
                   <div className="flex items-baseline">
                     <p className="text-2xl font-semibold text-white">{stat.value}</p>
-                    <span 
+                    <span
                       className={`ml-2 text-sm ${stat.changeType === 'positive' ? 'text-green-400' : 'text-red-400'}`}
                     >
                       {stat.change}
@@ -255,15 +255,15 @@ export default function DiscoverPage() {
         {/* Main Content */}
         <Tabs defaultValue="open" className="w-full">
           <TabsList className="bg-white/5 backdrop-blur-sm border border-white/10">
-            <TabsTrigger 
-              value="open" 
+            <TabsTrigger
+              value="open"
               className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-pink-500/20 data-[state=active]:to-purple-600/20 data-[state=active]:text-white data-[state=active]:border-pink-500/50 flex items-center gap-2"
             >
               <Swords className="h-4 w-4" />
               Open Matches
             </TabsTrigger>
-            <TabsTrigger 
-              value="featured" 
+            <TabsTrigger
+              value="featured"
               className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-pink-500/20 data-[state=active]:to-purple-600/20 data-[state=active]:text-white data-[state=active]:border-pink-500/50 flex items-center gap-2"
             >
               <Trophy className="h-4 w-4" />
@@ -302,7 +302,7 @@ export default function DiscoverPage() {
                           Best of {match.best_of} • Prize: {formatCurrency(match.total_pot_cents)}
                         </p>
                         <div className="mt-auto pt-4">
-                          <Button 
+                          <Button
                             className="w-full bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white"
                             onClick={() => handleAcceptMatch(match.id)}
                             disabled={acceptMatchMutation.isPending}
@@ -316,7 +316,7 @@ export default function DiscoverPage() {
                   ))}
               </div>
             ) : (
-              <motion.div 
+              <motion.div
                 className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-blue-900/30 to-cyan-900/30 p-8 backdrop-blur-sm border border-white/10"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -352,7 +352,7 @@ export default function DiscoverPage() {
                     Best of 3. Fast queue. US servers.
                   </p>
                   <div className="mt-auto pt-4">
-                    <Button 
+                    <Button
                       className="w-full bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white"
                       onClick={() => {
                         setMatchType('QUICK_DUEL');
@@ -385,7 +385,7 @@ export default function DiscoverPage() {
                     Skill-matched 1v1 with rating impact.
                   </p>
                   <div className="mt-auto pt-4">
-                    <Button 
+                    <Button
                       className="w-full bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white"
                       onClick={() => {
                         setMatchType('RANKED');

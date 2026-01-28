@@ -2,7 +2,6 @@ import { createContext, useContext, useEffect, useMemo, useState, useCallback } 
 import { api, getAccessToken, getRefreshToken, setTokens, clearTokens } from '@/lib/api'
 import { supabase } from '@/lib/supabaseClient'
 import type { AxiosError } from 'axios'
-import type { Session } from '@supabase/supabase-js'
 
 type User = {
   id: string

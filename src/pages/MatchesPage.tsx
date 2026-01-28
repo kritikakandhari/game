@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Clock, Plus, ShieldCheck, Swords, CheckCircle, XCircle } from 'lucide-react';
+import { Clock, Plus, ShieldCheck, CheckCircle, XCircle } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 
@@ -11,7 +11,7 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { api } from '@/lib/api';
 import { useAuth } from '@/auth/AuthProvider';
-import type { AxiosError } from 'axios';
+
 
 type Match = {
   id: string;
@@ -106,20 +106,7 @@ export default function MatchesPage() {
     },
   });
 
-  // Complete match mutation
-  const completeMatchMutation = useMutation({
-    mutationFn: async ({ matchId, winnerId, gameResults }: { matchId: string; winnerId: string; gameResults: Array<{ game_number: number; winner_id: string }> }) => {
-      const response = await api.post(`/matches/${matchId}/complete`, {
-        winner_id: winnerId,
-        game_results: gameResults,
-      });
-      return response.data;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['my-matches'] });
-      queryClient.invalidateQueries({ queryKey: ['rankings'] });
-    },
-  });
+
 
   const handleCreateMatch = () => {
     if (!user) return;
@@ -271,15 +258,15 @@ export default function MatchesPage() {
                   </span>
                 </div>
                 <div className="flex gap-2">
-                  <Button 
-                    size="sm" 
+                  <Button
+                    size="sm"
                     variant="outline"
                     onClick={() => navigate(`/app/matches/${match.id}`)}
                   >
                     View
                   </Button>
                   {match.status === 'ACCEPTED' && (
-                    <Button 
+                    <Button
                       size="sm"
                       onClick={() => startMatchMutation.mutate(match.id)}
                       disabled={startMatchMutation.isPending}
@@ -288,7 +275,7 @@ export default function MatchesPage() {
                     </Button>
                   )}
                   {match.status === 'IN_PROGRESS' && (
-                    <Button 
+                    <Button
                       size="sm"
                       onClick={() => {
                         // TODO: Open completion dialog
