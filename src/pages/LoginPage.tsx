@@ -92,7 +92,7 @@ export default function LoginPage() {
             <ArrowLeft className="mr-2 h-4 w-4" /> Back
           </Button>
 
-          <div className="relative overflow-hidden rounded-2xl bg-white/5 backdrop-blur-sm border border-white/10 p-8 shadow-2xl">
+          <div className="relative overflow-hidden rounded-2xl bg-white/5 backdrop-blur-sm border border-white/10 p-4 md:p-8 shadow-2xl">
             {/* Decorative elements */}
             <div className="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-pink-500/10 blur-3xl" />
             <div className="absolute -left-20 -bottom-20 h-64 w-64 rounded-full bg-purple-500/10 blur-3xl" />
