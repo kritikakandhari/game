@@ -126,7 +126,7 @@ export default function LandingPage() {
       <Navbar />
 
       {/* Hero Section */}
-      <section className="relative overflow-hidden pt-12 sm:pt-16 md:pt-20">
+      <section className="relative overflow-hidden pt-20 sm:pt-24 md:pt-32">
         <div className="absolute inset-0 bg-grid-white/5 [mask-image:linear-gradient(to_bottom,transparent,black_70%)]" />
         <div className="container relative z-10 mx-auto px-4 pt-4 pb-20 text-center sm:px-6 sm:pt-6 lg:px-8 lg:pt-8 lg:pb-28">
           {/* Company Name with Fancy Animation */}
