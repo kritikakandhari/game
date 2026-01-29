@@ -8,6 +8,9 @@ import LeaderboardPage from '@/pages/LeaderboardPage'
 import ProfilePage from '@/pages/ProfilePage'
 import LoginPage from '@/pages/LoginPage'
 import RegisterPage from '@/pages/RegisterPage'
+import DashboardPage from '@/pages/DashboardPage'
+import GuidePage from '@/pages/GuidePage'
+import ForgotPasswordPage from '@/pages/ForgotPasswordPage'
 
 function App() {
   return (
@@ -16,10 +19,13 @@ function App() {
       <Route path="/" element={<LandingPage />} />
       <Route path="/login" element={<LoginPage />} />
       <Route path="/register" element={<RegisterPage />} />
+      <Route path="/forgot-password" element={<ForgotPasswordPage />} />
 
       {/* Protected app routes */}
       <Route path="/app" element={<AppLayout />}>
-        <Route index element={<Navigate to="discover" replace />} />
+        <Route index element={<Navigate to="dashboard" replace />} />
+        <Route path="dashboard" element={<DashboardPage />} />
+        <Route path="guide" element={<GuidePage />} />
         <Route path="discover" element={<DiscoverPage />} />
         <Route
           path="matches"

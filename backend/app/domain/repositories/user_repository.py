@@ -18,7 +18,8 @@ class UserRepository(ABC):
         email: str,
         password_hash: str,
         username: str,
-        display_name: Optional[str] = None
+        display_name: Optional[str] = None,
+        id: Optional[UUID] = None
     ) -> tuple[User, PlayerProfile]:
         """Create a new user and profile."""
         pass

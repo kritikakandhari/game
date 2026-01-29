@@ -1,7 +1,6 @@
 import { createContext, useContext, useEffect, useMemo, useState, useCallback } from 'react'
-import { api, getAccessToken, getRefreshToken, setTokens, clearTokens } from '@/lib/api'
+import { api, getRefreshToken, setTokens, clearTokens } from '@/lib/api'
 import { supabase } from '@/lib/supabaseClient'
-import type { AxiosError } from 'axios'
 
 type User = {
   id: string
@@ -36,28 +35,38 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [isLoading, setIsLoading] = useState(true)
 
   const fetchCurrentUser = useCallback(async () => {
-    const token = getAccessToken()
-    if (!token) {
-      setIsLoading(false)
-      return
-    }
-
     try {
-      const response = await api.get('/auth/me')
-      // Backend returns data directly, not nested in data.data
-      const data = response.data
-      setUser(data.user)
-      setProfile(data.profile)
-    } catch (error) {
-      const axiosError = error as AxiosError
-      if (axiosError.response?.status === 401) {
-        // Token invalid, clear it
-        clearTokens()
-        setUser(null)
-        setProfile(null)
+      // OFFLINE MODE: Skip Backend, use Supabase Session directly
+      const { data: { session } } = await supabase.auth.getSession();
+
+      if (session && session.user) {
+        // Create local user state from session
+        setUser({
+          id: session.user.id,
+          email: session.user.email!,
+          email_verified: !!session.user.confirmed_at,
+          account_status: 'active'
+        });
+
+        // Create local profile state from session metadata
+        setProfile({
+          id: session.user.id,
+          user_id: session.user.id,
+          username: session.user.user_metadata?.username || session.user.email?.split('@')[0] || 'User',
+          display_name: session.user.user_metadata?.full_name,
+          avatar_url: session.user.user_metadata?.avatar_url,
+          region: 'NA'
+        });
+      } else {
+        setUser(null);
+        setProfile(null);
       }
+    } catch (error) {
+      console.error('Error fetching Supabase session:', error);
+      setUser(null);
+      setProfile(null);
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
   }, [])
 
@@ -67,6 +76,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (session) {
         // If we have a Supabase session, sync the tokens to where api.ts expects them
         setTokens(session.access_token, session.refresh_token)
+
         await fetchCurrentUser()
       } else if (event === 'SIGNED_OUT') {
         clearTokens()
@@ -78,7 +88,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return () => {
       subscription.unsubscribe()
     }
-  }, [fetchCurrentUser]) // Added dependency
+  }, [fetchCurrentUser]) // Removed user dependency to avoid loop
 
   // Initial load
   useEffect(() => {

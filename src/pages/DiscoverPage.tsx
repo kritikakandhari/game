@@ -47,6 +47,45 @@ const stats = [
   { name: 'Win Rate', value: '64%', icon: Trophy, change: '+2%', changeType: 'positive' },
 ];
 
+const MOCK_MATCHES: Match[] = [
+  {
+    id: 'mock-1',
+    match_type: 'QUICK_DUEL',
+    status: 'CREATED',
+    stake_cents: 500,
+    total_pot_cents: 1000,
+    best_of: 3,
+    created_by: 'user_mock_1',
+    accepted_by: null,
+    created_at: new Date().toISOString(),
+    participants: [{ user_id: 'user_mock_1', username: 'ShadowSlayer' }]
+  },
+  {
+    id: 'mock-2',
+    match_type: 'RANKED',
+    status: 'CREATED',
+    stake_cents: 2000,
+    total_pot_cents: 4000,
+    best_of: 5,
+    created_by: 'user_mock_2',
+    accepted_by: null,
+    created_at: new Date().toISOString(),
+    participants: [{ user_id: 'user_mock_2', username: 'ProFightingGamer' }]
+  },
+  {
+    id: 'mock-3',
+    match_type: 'DIRECT_CHALLENGE',
+    status: 'CREATED',
+    stake_cents: 10000,
+    total_pot_cents: 20000,
+    best_of: 7,
+    created_by: 'user_mock_3',
+    accepted_by: null,
+    created_at: new Date().toISOString(),
+    participants: [{ user_id: 'user_mock_3', username: 'HighRoller' }]
+  }
+];
+
 export default function DiscoverPage() {
   const { user } = useAuth();
   const queryClient = useQueryClient();
@@ -60,10 +99,21 @@ export default function DiscoverPage() {
   const { data: matchesData, isLoading: matchesLoading } = useQuery<MatchListResponse>({
     queryKey: ['matches', 'CREATED'],
     queryFn: async () => {
-      const response = await api.get('/matches', {
-        params: { status: 'CREATED', limit: 20 }
-      });
-      return response.data;
+      try {
+        const response = await api.get('/matches', {
+          params: { status: 'CREATED', limit: 20 }
+        });
+        return response.data;
+      } catch (err) {
+        console.warn("Backend offline, loading MOCK DATA for Discover page.");
+        // Return mock data structure
+        return {
+          data: MOCK_MATCHES,
+          meta: {
+            pagination: { cursor: null, has_more: false }
+          }
+        };
+      }
     },
     refetchInterval: 5000, // Poll every 5 seconds
   });

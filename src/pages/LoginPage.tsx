@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { ArrowLeft, Github } from 'lucide-react';
-import { api, setTokens } from '@/lib/api';
+import { setTokens } from '@/lib/api';
+import { supabase } from '@/lib/supabaseClient';
 import { useAuth } from '@/auth/AuthProvider';
 import type { AxiosError } from 'axios';
 
@@ -27,13 +28,32 @@ const DiscordIcon = ({ className }: { className?: string }) => (
 export default function LoginPage() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { refreshUser, signInWithOAuth } = useAuth(); // Added signInWithOAuth
-  const from = (location.state as { from?: string } | null)?.from ?? '/app/discover';
+  const { signInWithOAuth } = useAuth(); // Added signInWithOAuth
+  const from = (location.state as { from?: string } | null)?.from ?? '/app/dashboard';
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Debug connection health
+  const [healthError, setHealthError] = useState<string | null>(null);
+  useEffect(() => {
+    // DEBUG: Confirm new code is running
+    console.log("DEBUG: Direct Login Active");
+    // alert("Fixed Login Page Loaded!"); 
+
+    fetch(`${import.meta.env.VITE_API_URL}/health`)
+      .then(res => {
+        if (!res.ok) throw new Error('Status: ' + res.status);
+        return res.json();
+      })
+      .catch(err => {
+        console.error("Health Check Failed:", err);
+        // Still show health error but clarify it's optional for login now
+        setHealthError(`Backend unavailable, but you can still Login with Supabase!`);
+      });
+  }, []);
 
   // Added handleOAuthLogin function
   const handleOAuthLogin = async (provider: 'google' | 'github' | 'discord') => {
@@ -48,28 +68,50 @@ export default function LoginPage() {
     }
   };
 
+
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
     setIsSubmitting(true);
 
     try {
-      const response = await api.post('/auth/login', {
+      // Direct Supabase Login (Bypass Backend Proxy)
+      const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
 
-      // Backend returns data directly, not nested in data.data
-      const { access_token, refresh_token } = response.data;
-      setTokens(access_token, refresh_token);
+      if (error) throw error;
 
-      // Refresh user data
-      await refreshUser();
-
-      navigate(from, { replace: true });
+      if (data.session) {
+        setTokens(data.session.access_token, data.session.refresh_token);
+        // refreshUser will happen via onAuthStateChange in AuthProvider
+        navigate(from, { replace: true });
+      }
     } catch (err) {
-      const axiosError = err as AxiosError<{ error: { message: string } }>;
-      const errorMessage = axiosError.response?.data?.error?.message || 'Invalid email or password';
+      console.error("Login Error Details:", err);
+      // alert(`Login Failed: ${(err as Error).message}`); 
+
+      const axiosError = err as AxiosError<{ error: { message: string }, detail?: string }>;
+      // Check for specific backend error messages
+      console.error("Login Check:", axiosError.response?.data);
+
+      let errorMessage = 'Invalid email or password';
+
+      // If backend returns a detail string (FastAPI style)
+      if (typeof axiosError.response?.data?.detail === 'string') {
+        errorMessage = axiosError.response.data.detail;
+      }
+      // If backend returns { error: { message: ... } } (Supabase style sometimes)
+      else if (axiosError.response?.data?.error?.message) {
+        errorMessage = axiosError.response.data.error.message;
+      }
+
+      if (errorMessage === 'User not found' || errorMessage.includes('not found')) {
+        errorMessage = "We couldn't find an account with that email.";
+      }
+
       setError(errorMessage);
     } finally {
       setIsSubmitting(false);
@@ -91,6 +133,17 @@ export default function LoginPage() {
           >
             <ArrowLeft className="mr-2 h-4 w-4" /> Back
           </Button>
+
+          {healthError && (
+            <div className="mb-4 rounded-md bg-yellow-500/20 p-4 text-yellow-200 border border-yellow-500/50 flex items-center shadow-lg">
+              <svg className="w-5 h-5 mr-3 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              </svg>
+              <div className="text-sm font-medium">
+                {healthError}
+              </div>
+            </div>
+          )}
 
           <div className="relative overflow-hidden rounded-2xl bg-white/5 backdrop-blur-sm border border-white/10 p-4 md:p-8 shadow-2xl">
             {/* Decorative elements */}
@@ -278,6 +331,6 @@ export default function LoginPage() {
           </div>
         </motion.div>
       </div>
-    </PageLayout>
+    </PageLayout >
   )
 }

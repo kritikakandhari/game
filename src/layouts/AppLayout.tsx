@@ -1,5 +1,5 @@
-import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
-import { Menu, Swords, Trophy, User, Home, ChevronDown, X } from 'lucide-react';
+import { NavLink, Outlet, useLocation, useNavigate, Navigate } from 'react-router-dom';
+import { Menu, Swords, Trophy, User, Home, ChevronDown, X, Search } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState, useEffect } from 'react';
 
@@ -17,14 +17,15 @@ type NavItem = {
 
 
 const navItems: NavItem[] = [
-  { to: '/app/discover', label: 'Discover', icon: Home, color: 'text-purple-400' },
+  { to: '/app/dashboard', label: 'Dashboard', icon: Home, color: 'text-purple-400' },
+  { to: '/app/discover', label: 'Discover', icon: Search, color: 'text-teal-400' },
   { to: '/app/matches', label: 'Matches', icon: Swords, color: 'text-blue-400' },
   { to: '/app/leaderboard', label: 'Leaderboard', icon: Trophy, color: 'text-yellow-400' },
   { to: '/app/profile', label: 'Profile', icon: User, color: 'text-pink-400' },
 ];
 
 const FloatingParticles = () => {
-  const [particles] = useState(() => 
+  const [particles] = useState(() =>
     Array(20).fill(0).map(() => ({
       id: Math.random(),
       x: Math.random() * 100,
@@ -69,13 +70,13 @@ const FloatingParticles = () => {
 
 function NavLinks({ onNavigate, isMobile = false }: { onNavigate?: () => void; isMobile?: boolean }) {
   const location = useLocation();
-  
+
   return (
     <nav className={isMobile ? "space-y-1 w-full" : "flex items-center space-x-1"}>
       {navItems.map((item) => {
         const isActive = location.pathname.startsWith(item.to);
         const Icon = item.icon;
-        
+
         return (
           <NavLink
             key={item.to}
@@ -84,8 +85,8 @@ function NavLinks({ onNavigate, isMobile = false }: { onNavigate?: () => void; i
             className={cn(
               'flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium transition-colors',
               'hover:bg-white/5',
-              isActive 
-                ? 'text-white' 
+              isActive
+                ? 'text-white'
                 : 'text-gray-400 hover:text-white',
               isMobile ? 'w-full' : 'flex-col py-1.5 px-3'
             )}
@@ -103,7 +104,7 @@ function NavLinks({ onNavigate, isMobile = false }: { onNavigate?: () => void; i
               {item.label}
             </span>
             {isActive && !isMobile && (
-              <motion.span 
+              <motion.span
                 className="absolute -bottom-1 left-1/2 h-0.5 bg-purple-500 w-4 -translate-x-1/2 rounded-full"
                 layoutId="nav-underline"
                 transition={{ type: 'spring', bounce: 0.2, duration: 0.6 }}
@@ -118,7 +119,7 @@ function NavLinks({ onNavigate, isMobile = false }: { onNavigate?: () => void; i
 
 
 function AppLayout() {
-  const { user, profile, signOut } = useAuthContext();
+  const { user, profile, signOut, isLoading } = useAuthContext();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
@@ -128,8 +129,18 @@ function AppLayout() {
     setIsMobileMenuOpen(false);
   }, [location]);
 
+  // Handle Loading State
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-900 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-500"></div>
+      </div>
+    );
+  }
+
+  // Handle Unauthenticated State
   if (!user || !profile) {
-    return null;
+    return <Navigate to="/login" replace state={{ from: location.pathname }} />;
   }
 
   return (
@@ -149,9 +160,9 @@ function AppLayout() {
             <div className="flex items-center">
               <div className="flex items-center space-x-2">
                 <div className="h-10 w-10 rounded-xl overflow-hidden flex items-center justify-center">
-                  <img 
-                    src="/images/logo.png" 
-                    alt="FGC Money Match Logo" 
+                  <img
+                    src="/images/logo.png"
+                    alt="FGC Money Match Logo"
                     className="h-full w-full object-contain"
                   />
                 </div>

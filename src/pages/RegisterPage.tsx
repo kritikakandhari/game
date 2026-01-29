@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { ArrowLeft, Github } from 'lucide-react';
@@ -34,6 +34,20 @@ export default function RegisterPage() {
   const [displayName, setDisplayName] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Debug connection health
+  const [healthError, setHealthError] = useState<string | null>(null);
+  useEffect(() => {
+    fetch(`${import.meta.env.VITE_API_URL}/health`)
+      .then(res => {
+        if (!res.ok) throw new Error('Status: ' + res.status);
+        return res.json();
+      })
+      .catch(err => {
+        console.error("Health Check Failed:", err);
+        setHealthError(`Cannot connect to backend server: ${err.message}. Is it running?`);
+      });
+  }, []);
 
   // Added handleOAuthLogin
   const handleOAuthLogin = async (provider: 'google' | 'github' | 'discord') => {
@@ -113,6 +127,12 @@ export default function RegisterPage() {
           >
             <ArrowLeft className="mr-2 h-4 w-4" /> Back
           </Button>
+
+          {healthError && (
+            <div className="mb-4 rounded-md bg-red-600 p-4 text-white font-bold shadow-lg border-2 border-white">
+              SERVER ERROR: {healthError}
+            </div>
+          )}
 
           <div className="relative overflow-hidden rounded-2xl bg-white/5 backdrop-blur-sm border border-white/10 p-4 md:p-8 shadow-2xl">
             {/* Decorative elements */}

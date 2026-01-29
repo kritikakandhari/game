@@ -57,7 +57,8 @@ class UserRepositoryImpl(UserRepository):
         email: str,
         password_hash: str,
         username: str,
-        display_name: Optional[str] = None
+        display_name: Optional[str] = None,
+        id: Optional[UUID] = None
     ) -> tuple[User, PlayerProfile]:
         """Create a new user, profile, wallet, and ranking."""
         from datetime import datetime
@@ -65,6 +66,7 @@ class UserRepositoryImpl(UserRepository):
         
         # Create user
         user_model = UserModel(
+            id=id,
             email=email,
             password_hash=password_hash,
             account_status="ACTIVE"
